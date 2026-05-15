@@ -1,0 +1,26 @@
+# dependencias
+node_modules/
+
+# build Next.js
+.next/
+out/
+
+# datos locales (sesión WhatsApp y base de datos)
+auth/
+data/
+
+# entorno
+.env.local
+.env*.local
+
+# logs
+*.log
+npm-debug.log*
+
+# sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
