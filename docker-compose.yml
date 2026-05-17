@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openai/gpt-4o-mini}
+    volumes:
+      - whatsapp_auth:/app/auth
+      - whatsapp_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  whatsapp_auth:
+  whatsapp_data:
