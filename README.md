@@ -22,6 +22,8 @@ Editá `.env.local`:
 ```
 OPENROUTER_API_KEY=sk-or-tu-clave-aqui
 OPENROUTER_MODEL=openai/gpt-4o-mini
+BASIC_AUTH_USER=admin
+BASIC_AUTH_PASSWORD=una-clave-larga-y-segura
 ```
 
 > **Modelos recomendados:** `openai/gpt-4o-mini` ($0.15 por millón de tokens).
@@ -87,7 +89,7 @@ auth/                       # sesión Baileys (gitignored)
 
 1. Pusheá el código a un repositorio GitHub
 2. Conectá el repo en EasyPanel
-3. Agregá las variables de entorno (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`)
+3. Agregá las variables de entorno (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `BASIC_AUTH_USER`, `BASIC_AUTH_PASSWORD`)
 4. Configurá volúmenes persistentes en `/app/data` y `/app/auth` — **son obligatorios**:
    - Sin `/app/data`: perdés todas las conversaciones en cada redespliegue
    - Sin `/app/auth`: tenés que re-escanear el QR en cada redespliegue
@@ -96,11 +98,9 @@ auth/                       # sesión Baileys (gitignored)
 
 ## ⚠️ Seguridad
 
-**El dashboard no tiene autenticación.** Si lo exponés a internet, cualquiera con la URL puede leer todas tus conversaciones de WhatsApp y enviar mensajes.
-
-Antes de un deploy público, configurá alguna de estas opciones:
-- Basic auth a nivel proxy en EasyPanel/Caddy/Nginx
-- [Cloudflare Access](https://www.cloudflare.com/products/zero-trust/access/)
+El dashboard y sus APIs usan Basic Auth cuando configurás `BASIC_AUTH_USER` y `BASIC_AUTH_PASSWORD`.
+En desarrollo, si esas variables faltan, la app sigue abriendo para no bloquear pruebas locales.
+En producción, si faltan, la app responde `503` para evitar publicar conversaciones de WhatsApp sin protección.
 
 ## Solución de problemas
 
@@ -128,5 +128,4 @@ taskkill /PID <PID> /F
 - Function calling real con `tools` de OpenRouter
 - Auto-toggle a HUMAN cuando el bot dice frase específica
 - WebSocket en lugar de polling
-- Autenticación básica integrada en el dashboard
 - Soporte de grupos
