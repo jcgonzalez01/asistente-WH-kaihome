@@ -68,9 +68,51 @@ async function processMessage(
 
   if (!reply) return;
 
-  insertMessage(convo.id, "assistant", reply);
-  await sock.sendMessage(remoteJid, { text: reply });
+  // Detectar etiqueta de cita confirmada y notificar al técnico
+  const citaMatch = reply.match(/\[CITA_CONFIRMADA:\s*(.+?)\]/s);
+  const cleanReply = reply.replace(/\[CITA_CONFIRMADA:[^\]]*\]/g, "").trim();
+
+  insertMessage(convo.id, "assistant", cleanReply);
+  await sock.sendMessage(remoteJid, { text: cleanReply });
   console.log(`[bot] → Enviado a ${phone}`);
+
+  if (citaMatch) {
+    await notifyTechnician(citaMatch[1].trim(), phone, pushName, sock);
+  }
+}
+
+async function notifyTechnician(
+  citaInfo: string,
+  clientPhone: string,
+  _clientName: string | null,
+  sock: WASocket
+) {
+  const TECH_JID = "18098031717@s.whatsapp.net";
+
+  // Parsear nombre, dirección y horario de la etiqueta
+  const get = (field: string) => {
+    const m = citaInfo.match(new RegExp(`${field}=([^|\\]]+)`, "i"));
+    return m ? m[1].trim() : "No especificado";
+  };
+
+  const nombre   = get("nombre");
+  const direccion = get("direccion");
+  const horario  = get("horario");
+
+  const msg =
+    `🔔 *Nueva cita confirmada*\n\n` +
+    `👤 Cliente: ${nombre}\n` +
+    `📱 WhatsApp: +${clientPhone}\n` +
+    `📍 Dirección: ${direccion}\n` +
+    `🕐 Horario: ${horario}\n\n` +
+    `_Confirmado por el bot de Kaizen Home RD_`;
+
+  try {
+    await sock.sendMessage(TECH_JID, { text: msg });
+    console.log(`[bot] 🔔 Notificación de cita enviada al técnico (${TECH_JID})`);
+  } catch (err) {
+    console.error("[bot] Error enviando notificación al técnico:", err);
+  }
 }
 
 async function handleOwnerCommand(text: string, sock: WASocket, senderJid: string) {
